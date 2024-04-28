@@ -72,4 +72,4 @@ jobs:
           publish_dir: ./playwright-report
           destination_dir: ${{steps.timestampid.outputs.timestamp}}
       - name: Write URL in summery
-        run: echo "test result - https://${{github.repository_owner}}.github.io/weekends_test-"
+        run: echo "test result - https://${{github.repository_owner}}.github.io/weekends_test-/${{steps.timestampid.outputs.timestamp}}"
