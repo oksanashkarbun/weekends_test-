@@ -34,10 +34,14 @@ jobs:
   merge-reports:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+
+    outputs:
+      timestamp: ${{steps.timestampid.outputs.timestamp}}
     needs: [ playwright-tests]
-
-
     steps:
+      - name: Set timestamp
+        id: timestampid
+        run: echo "timestamp=$(date --utc +%Y%m%d_%H%M%SZ)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -58,6 +62,14 @@ jobs:
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         with:
-          name: html-report--attempt-${{ github.run_attempt }}
+          name: html-report-${{steps.timestampid.outputs.timestamp}}
           path: playwright-report
           retention-days: 30
+      - name: Push the files to github pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: ${{steps.timestampid.outputs.timestamp}}
+      - name: Write URL in summery
+        run: echo "test result - https://${{github.repository_owner}}.github.io/playwright-example-with-typescript"
